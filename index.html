@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resolve Já</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <!-- Top Navigation -->
+    <header>
+      <div class="logo">Resolve Já</div>
+      <nav>
+        <ul>
+          <li><a href="#">Início</a></li>
+          <li><a href="servicos.html">Serviços</a></li>
+          <li><a href="profissionais.html">Profissionais</a></li>
+          <li><a href="contatos.html">Contatos</a></li>
+          <li><a href="perfil.html">Perfil</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Main Banner -->
+    <!-- Main Banner -->
+    <section class="banner">
+      <div class="banner-content">
+        <h1>Transforme sua casa com a ajuda certa!</h1>
+        <p>
+          Seja para pequenas reparos ou grandes projetos, temos os profissionais
+          ideais para você. Entre em contato e descubra como podemos ajudar!
+        </p>
+        <button class="action-btn">VER PROFISSIONAIS</button>
+      </div>
+      <div class="banner-image">
+        <img src="profissional.png" alt="Trabalhador de manutenção" />
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="main-content">
+      <div class="search-bar">
+        <input
+          type="text"
+          id="locationInput"
+          placeholder="Buscar por localidade..."
+        />
+        <select id="serviceSelect">
+          <option value="Elétrica">Elétrica</option>
+          <option value="Hidráulica">Hidráulica</option>
+          <option value="Manutenção">Manutenção</option>
+        </select>
+        <button onclick="searchProfessionals()">Buscar</button>
+      </div>
+
+      <!-- Container de Resultados -->
+      <div id="results" class="results-container"></div>
+
+      <!-- Container do Mapa -->
+      <div id="map" style="height: 400px; margin-top: 20px"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        <a href="#">Política de Privacidade</a> |
+        <a href="#">Termos de Uso</a> | <a href="#">Suporte</a>
+      </p>
+    </footer>
+
+    <script>
+      const professionals = [
+        {
+          name: "João Silva",
+          specialty: "Elétrica",
+          location: "São Paulo",
+          rating: "★★★★☆",
+          coordinates: [-23.55052, -46.633308],
+        },
+        {
+          name: "Maria Oliveira",
+          specialty: "Hidráulica",
+          location: "Rio de Janeiro",
+          rating: "★★★★★",
+          coordinates: [-22.906847, -43.172896],
+        },
+        {
+          name: "Carlos Santos",
+          specialty: "Manutenção",
+          location: "Belo Horizonte",
+          rating: "★★★☆☆",
+          coordinates: [-19.917299, -43.934559],
+        },
+      ];
+
+      let map, markersLayer;
+
+      function initMap() {
+        map = L.map("map").setView([-14.235004, -51.92528], 4);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+      }
+
+      function searchProfessionals() {
+        const selectedService = document.getElementById("serviceSelect").value;
+        const locationInput = document
+          .getElementById("locationInput")
+          .value.trim()
+          .toLowerCase();
+        const filteredProfessionals = professionals.filter(
+          (professional) =>
+            professional.specialty === selectedService &&
+            professional.location.toLowerCase().includes(locationInput)
+        );
+        const resultsContainer = document.getElementById("results");
+        resultsContainer.innerHTML = "";
+        markersLayer.clearLayers();
+
+        filteredProfessionals.forEach((professional) => {
+          const professionalDiv = document.createElement("div");
+          professionalDiv.classList.add("professional-result");
+          professionalDiv.innerHTML = `
+                    <h3>${professional.name}</h3>
+                    <p>Especialidade: ${professional.specialty}</p>
+                    <p>Localidade: ${professional.location}</p>
+                    <p>Avaliação: ${professional.rating}</p>
+                `;
+          resultsContainer.appendChild(professionalDiv);
+
+          // Add marker to the map
+          const marker = L.marker(professional.coordinates)
+            .addTo(markersLayer)
+            .bindPopup(
+              `${professional.name} - ${professional.specialty}<br>${professional.location}<br>${professional.rating}`
+            )
+            .openPopup();
+        });
+
+        if (filteredProfessionals.length > 0) {
+          const firstProfessional = filteredProfessionals[0];
+          map.setView(firstProfessional.coordinates, 12); // Zoom into the first result
+        } else {
+          alert(
+            "Nenhum profissional encontrado para os critérios selecionados."
+          );
+        }
+      }
+
+      window.onload = function () {
+        initMap();
+      };
+    </script>
+  </body>
+</html>
